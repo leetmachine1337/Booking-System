@@ -1,0 +1,59 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  phone     String?  @unique
+  username  String?  @unique
+  password  String
+  role      String   @default("USER")
+  createdAt DateTime @default(now())
+
+  appointments Appointment[]
+}
+
+model Store {
+  id    Int    @id @default(autoincrement())
+  name  String
+  address String
+
+  schedules     WorkSchedule[]
+  appointments  Appointment[]
+}
+
+model WorkSchedule {
+  id        Int    @id @default(autoincrement())
+  storeId   Int
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  isDayOff  Boolean @default(false)
+
+  store Store @relation(fields: [storeId], references: [id])
+}
+
+model Appointment {
+  id             Int       @id @default(autoincrement())
+  date           DateTime
+  time           String
+  status         String    @default("active")
+  previousDate   DateTime?
+  previousTime   String?
+  cancelledAt    DateTime?
+  rescheduledAt  DateTime?
+  completedAt    DateTime?
+  noShowAt       DateTime?
+  adminNote      String?
+
+  userId  Int
+  storeId Int
+
+  user  User  @relation(fields: [userId], references: [id])
+  store Store @relation(fields: [storeId], references: [id])
+}
